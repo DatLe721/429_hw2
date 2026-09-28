@@ -147,23 +147,18 @@ class NgramModelWithInterpolation(NgramModel):
 ################################################################################
 
 
-DATA_DIR = '.'                      
-TEST_FILE = os.path.join(DATA_DIR, 'cities_test.txt')
+TRAIN_DIR = 'train'
+VAL_DIR = 'val'                    
+TEST_FILE = 'cities_test.txt'
 END = '$'                           
-DEV_FRACTION = 0.1
 
 def read_lines(path):
     with open(path, encoding='utf-8', errors='ignore') as f:
         return [line.strip() for line in f if line.strip()]
 
 def split_data():
-    rng = random.Random(0)
-    train, dev = {}, {}
-    for cc in COUNTRY_CODES:
-        lines = read_lines(os.path.join(DATA_DIR, cc + '.txt'))
-        rng.shuffle(lines)
-        cut = int(len(lines) * DEV_FRACTION)
-        dev[cc], train[cc] = lines[:cut], lines[cut:]
+    train = {cc: read_lines(os.path.join(TRAIN_DIR, cc + '.txt')) for cc in COUNTRY_CODES}
+    dev = {cc: read_lines(os.path.join(VAL_DIR, cc + '.txt')) for cc in COUNTRY_CODES}
     return train, dev
 
 def train_models(n, k, data):
