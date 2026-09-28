@@ -146,11 +146,10 @@ class NgramModelWithInterpolation(NgramModel):
 # Part 3: Your N-Gram Model Experimentation
 ################################################################################
 
-# Only one labeled file per country was provided, so we hold out 10% of each
-# file as a development set (fixed seed so results are reproducible).
-DATA_DIR = '.'                      # folder containing af.txt, cn.txt, ..., cities_test.txt
+
+DATA_DIR = '.'                      
 TEST_FILE = os.path.join(DATA_DIR, 'cities_test.txt')
-END = '$'                           # special end-of-text character
+END = '$'                           
 DEV_FRACTION = 0.1
 
 def read_lines(path):
@@ -234,8 +233,8 @@ if __name__ == '__main__':
     result_fixk = [] 
     result_fixn = [] 
     for ni in n:
-        inter = create_ngram_model(NgramModelWithInterpolation, train_path, ni, 1)  # trained once per n
-        plain = inter.models[ni]                                                    # same counts, no retraining
+        inter = create_ngram_model(NgramModelWithInterpolation, train_path, ni, 1)  
+        plain = inter.models[ni]                                                    
         for path in paths:
             set_k(inter, 1)
             result_fixk.append((path, ni, 1, plain.perplexity(texts[path]), inter.perplexity(texts[path])))
@@ -255,7 +254,7 @@ if __name__ == '__main__':
     'no order 0':       [0, 1/3, 1/3, 1/3],
     }
 
-    inter = create_ngram_model(NgramModelWithInterpolation, train_path, 3, 1)  # trained once
+    inter = create_ngram_model(NgramModelWithInterpolation, train_path, 3, 1)
     result_lambda = []
     for name, lam in lams.items():
         inter.set_lambdas(lam)
@@ -269,7 +268,6 @@ if __name__ == '__main__':
     # part 3
     train, dev = split_data()
 
-    # Grid search over order, k, and lambda scheme using the dev set
     best = (0, None)
     for n in range(1, 7):
         for k in [0.01, 0.05, 0.1, 0.5, 1]:
@@ -284,7 +282,7 @@ if __name__ == '__main__':
     acc, (n, k, lam, name) = best
     print('\nBest: n=%d k=%s lambdas=%s -> dev acc %.4f' % (n, k, name, acc))
 
-    # Final model: retrain on ALL labeled data (train + dev), predict the test set
+
     full = {cc: train[cc] + dev[cc] for cc in COUNTRY_CODES}
     models = train_models(n, k, full)
     set_all_lambdas(models, lam)
