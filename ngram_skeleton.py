@@ -269,7 +269,6 @@ if __name__ == '__main__':
     # part 3
     train, dev = split_data()
 
-    # Grid search over order, k, and lambda scheme using the dev set
     best = (0, None)
     for n in range(1, 7):
         for k in [0.01, 0.05, 0.1, 0.5, 1]:
@@ -284,7 +283,6 @@ if __name__ == '__main__':
     acc, (n, k, lam, name) = best
     print('\nBest: n=%d k=%s lambdas=%s -> dev acc %.4f' % (n, k, name, acc))
 
-    # Final model: retrain on ALL labeled data (train + dev), predict the test set
     full = {cc: train[cc] + dev[cc] for cc in COUNTRY_CODES}
     models = train_models(n, k, full)
     set_all_lambdas(models, lam)
