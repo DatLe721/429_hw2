@@ -209,14 +209,10 @@ def lambda_schemes(n):
 
 if __name__ == '__main__':
     # part 1
-    m = create_ngram_model(NgramModel, 'shakespeare_input.txt', 2)
-    print(m.random_text(250))
-    m = create_ngram_model(NgramModel, 'shakespeare_input.txt', 3)
-    print(m.random_text(250))
-    m = create_ngram_model(NgramModel, 'shakespeare_input.txt', 4)
-    print(m.random_text(250))
-    m = create_ngram_model(NgramModel, 'shakespeare_input.txt', 7)
-    print(m.random_text(250))
+    n = [2, 3, 4, 7]
+    for ni in n:
+        m = create_ngram_model(NgramModel, 'shakespeare_input.txt', ni)
+        print(m.random_text(250))
 
 
 
@@ -232,11 +228,11 @@ if __name__ == '__main__':
             texts[path] = ' '.join(f.read().split())
 
     def set_k(inter, kval):
-        for m in inter.models:          # k only affects prob(), not the counts
+        for m in inter.models:  
             m.k = kval
 
-    result_fixk = []   # k = 1, vary n
-    result_fixn = []   # n = 2, vary k
+    result_fixk = [] 
+    result_fixn = [] 
     for ni in n:
         inter = create_ngram_model(NgramModelWithInterpolation, train_path, ni, 1)  # trained once per n
         plain = inter.models[ni]                                                    # same counts, no retraining
@@ -268,29 +264,32 @@ if __name__ == '__main__':
 
     for path, name, lam, p in result_lambda:
         print('%-22s %-17s %-28s %.3f' % (path, name, lam, p))
-    # train, dev = split_data()
 
-    # # Grid search over order, k, and lambda scheme using the dev set
-    # best = (0, None)
-    # for n in range(1, 7):
-    #     for k in [0.01, 0.05, 0.1, 0.5, 1]:
-    #         models = train_models(n, k, train)
-    #         for name, lam in lambda_schemes(n).items():
-    #             set_all_lambdas(models, lam)
-    #             acc = accuracy(models, dev)
-    #             print('n=%d k=%-5s lambdas=%-17s dev acc=%.4f' % (n, k, name, acc), flush=True)
-    #             if acc > best[0]:
-    #                 best = (acc, (n, k, lam, name))
 
-    # acc, (n, k, lam, name) = best
-    # print('\nBest: n=%d k=%s lambdas=%s -> dev acc %.4f' % (n, k, name, acc))
+    # part 3
+    train, dev = split_data()
 
-    # # Final model: retrain on ALL labeled data (train + dev), predict the test set
-    # full = {cc: train[cc] + dev[cc] for cc in COUNTRY_CODES}
-    # models = train_models(n, k, full)
-    # set_all_lambdas(models, lam)
+    # Grid search over order, k, and lambda scheme using the dev set
+    best = (0, None)
+    for n in range(1, 7):
+        for k in [0.01, 0.05, 0.1, 0.5, 1]:
+            models = train_models(n, k, train)
+            for name, lam in lambda_schemes(n).items():
+                set_all_lambdas(models, lam)
+                acc = accuracy(models, dev)
+                print('n=%d k=%-5s lambdas=%-17s dev acc=%.4f' % (n, k, name, acc), flush=True)
+                if acc > best[0]:
+                    best = (acc, (n, k, lam, name))
 
-    # with open('test_labels.txt', 'w') as out:
-    #     for city in read_lines(TEST_FILE):
-    #         out.write(classify(models, city) + '\n')
+    acc, (n, k, lam, name) = best
+    print('\nBest: n=%d k=%s lambdas=%s -> dev acc %.4f' % (n, k, name, acc))
+
+    # Final model: retrain on ALL labeled data (train + dev), predict the test set
+    full = {cc: train[cc] + dev[cc] for cc in COUNTRY_CODES}
+    models = train_models(n, k, full)
+    set_all_lambdas(models, lam)
+
+    with open('test_labels.txt', 'w') as out:
+        for city in read_lines(TEST_FILE):
+            out.write(classify(models, city) + '\n')
     print('Wrote test_labels.txt')
