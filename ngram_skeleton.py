@@ -277,10 +277,6 @@ if __name__ == '__main__':
     acc, (n, k, lam, name) = best
     print('\nBest: n=%d k=%s lambdas=%s -> dev acc %.4f' % (n, k, name, acc))
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 69e848a5c36e13cc411e3e58b15aa20c73646bec
     full = {cc: train[cc] + dev[cc] for cc in COUNTRY_CODES}
     models = train_models(n, k, full)
     set_all_lambdas(models, lam)
